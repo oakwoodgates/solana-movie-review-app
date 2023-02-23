@@ -21,6 +21,13 @@ export class Movie {
         borsh.str('description'),
     ])
 
+    static borshAccountSchema = borsh.struct([
+        borsh.bool('initialized'),
+        borsh.u8('rating'),
+        borsh.str('title'),
+        borsh.str('description'),
+      ])
+
     serialize(): Buffer {
         // create oversized buffer 
         const buffer = Buffer.alloc(1000)
@@ -29,4 +36,18 @@ export class Movie {
         // remove extra space from buffer
         return buffer.slice(0, this.borshInstructionSchema.getSpan(buffer))
     }
+
+    static deserialize(buffer?: Buffer): Movie|null {
+        if (!buffer) {
+            return null
+        }
+    
+        try {
+            const { title, rating, description } = this.borshAccountSchema.decode(buffer)
+            return new Movie(title, rating, description)
+        } catch(error) {
+            console.log('Deserialization error:', error)
+            return null
+        }
+      }
 }
